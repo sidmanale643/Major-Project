@@ -13,6 +13,10 @@ from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
+UPLOAD_FOLDER = 'uploads'
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
 disease_classes = ['Apple___Apple_scab',
                    'Apple___Black_rot',
                    'Apple___Cedar_apple_rust',
@@ -118,12 +122,8 @@ def init_chat_engine():
     return index.as_chat_engine(
         chat_mode="context",
         verbose=True,
-        system_prompt=(
-            "You are an agricultural chatbot, capable of having general conversations and offering detailed insights on farming techniques, crops, livestock, sustainability practices, and more. "
-            "Additionally, you can engage in discussions about various topics, including an essay about Paul Graham's life, his contributions to technology, and his philosophical views. "
-            "Feel free to provide helpful advice, answer questions, and offer thoughtful commentary on these subjects."
+        system_prompt = ("You are an agricultural chatbot, capable of having general conversations and offering detailed insights on farming techniques, crops, livestock, sustainability practices.")
         )
-    )
 
 disease_model = load_disease_model()
 chat_engine = init_chat_engine()
@@ -157,13 +157,13 @@ def predict_disease():
     if image.filename == '':
         return jsonify({'error': 'No selected file'}), 400
 
-    image_path = f"uploads/{image.filename}"
+    image_path = os.path.join(UPLOAD_FOLDER, image.filename)
     image.save(image_path)
 
     disease = predict(image_path)
-    management = provide_disease_management(disease)
-
-    return jsonify({'disease': disease, 'management': management})
+    management = provide_disease_management(disease).response
+    out = markdown.markdown(management)
+    return jsonify({'disease': disease, 'management':out})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
