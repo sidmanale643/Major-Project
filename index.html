@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Disease Diagnosis</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Plant Disease Diagnosis</h1>
+        <p class="text-center">Upload an image of a plant leaf to diagnose diseases and get management suggestions.</p>
+
+        <form id="upload-form" action="/predict" method="POST" enctype="multipart/form-data" class="mt-4">
+            <div class="mb-3">
+                <label for="image" class="form-label">Upload Image</label>
+                <input type="file" class="form-control" id="image" name="image" required>
+            </div>
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary">Diagnose</button>
+            </div>
+        </form>
+
+        <div id="result" class="mt-4" style="display:none;">
+            <h3 class="text-center">Diagnosis Result</h3>
+            <p><strong>Disease:</strong> <span id="disease"></span></p>
+            <p><strong>Management Suggestions:</strong></p>
+            <div id="management"></div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('upload-form');
+        const resultDiv = document.getElementById('result');
+        const diseaseSpan = document.getElementById('disease');
+        const managementDiv = document.getElementById('management');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+
+            const response = await fetch('/predict', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                diseaseSpan.textContent = data.disease;
+                managementDiv.innerHTML = data.management;
+                resultDiv.style.display = 'block';
+            } else {
+                alert('An error occurred. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

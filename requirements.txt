@@ -1,0 +1,10 @@
+flask,
+torch,
+torchvision, 
+pillow,
+markdown,
+llama_index.core,
+llama_index.llms.groq,
+llama_index.embeddings.mixedbreadai
+
+
